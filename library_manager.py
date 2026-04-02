@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Requires Python 3.8+
 """
 Library Manager
 
@@ -12,6 +13,9 @@ Each graph is entered through an *atomic* behavior (a menu choice) and proceeds
 through its subsequent behaviors in sequence.  Invariants declared in the design
 are enforced at the point they are introduced (e.g. Book Name Length ≥ 1).
 """
+from __future__ import annotations
+
+from typing import Optional
 
 
 # ---------------------------------------------------------------------------
@@ -90,7 +94,7 @@ def accept_choice_to_place_books_on_shelf() -> bool:
     return answer == "y"
 
 
-def get_book_from_basket() -> dict | None:
+def get_book_from_basket() -> Optional[dict]:
     """Retrieve the next book from the basket; returns None when empty."""
     if not basket:
         return None
