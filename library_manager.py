@@ -5,30 +5,34 @@ Library Manager
 
 Implemented from library_manager_design.dal, which defines three atomic graphs:
 
-  1. AcceptBook        — User adds a book (name + genre) to the basket.
-  2. PlaceBookOnShelf  — Librarian shelves every basket book, grouped by first letter.
-  3. AuditLibrary      — Librarian generates and hands an audit report to the user.
+  1. AcceptBook        - User adds a book (name + genre) to the basket.
+  2. PlaceBookOnShelf  - Librarian shelves every basket book, grouped by first letter.
+  3. AuditLibrary      - Librarian generates and hands an audit report to the user.
 
 Each graph is entered through an *atomic* behavior (a menu choice) and proceeds
 through its subsequent behaviors in sequence.  Invariants declared in the design
-are enforced at the point they are introduced (e.g. Book Name Length ≥ 1).
+are enforced at the point they are introduced (e.g. Book Name Length >= 1).
 """
 from __future__ import annotations
 
+from typing import Dict
+from typing import List
 from typing import Optional
 
 
 # ---------------------------------------------------------------------------
 # State shared across graphs (in-memory for the session)
 # ---------------------------------------------------------------------------
-basket: list[dict] = []   # books waiting to be shelved
-shelf: dict[str, list[dict]] = {}   # first-letter → [books]
+
+basket: List[Dict] = []
+shelf: Dict[str, List[Dict]] = {}
 
 
 # ---------------------------------------------------------------------------
-# Graph 1 – AcceptBook
-# Behaviors: AcceptChoiceToAddBookToBasket → AcceptBookFromUser → AddBookToBasket
+# Graph 1 - AcceptBook
+# Behaviors: AcceptChoiceToAddBookToBasket -> AcceptBookFromUser -> AddBookToBasket
 # ---------------------------------------------------------------------------
+
 
 def accept_choice_to_add_book_to_basket() -> bool:
     """Atomic entry behavior.
@@ -38,47 +42,58 @@ def accept_choice_to_add_book_to_basket() -> bool:
     Returns True when the user confirms, False to cancel.
     """
     print("\n=== Add a Book to the Basket ===")
-    answer = input("Proceed? (y/n): ").strip().lower()
-    return answer == "y"
+    raw_answer = input("Proceed? (y/n): ")
+    stripped_answer = raw_answer.strip()
+    lowered_answer = stripped_answer.lower()
+    confirmed = lowered_answer == "y"
+    return confirmed
 
 
-def accept_book_from_user() -> dict:
+def accept_book_from_user() -> Dict:
     """Accept book details from the user.
 
-    Participant – Book with invariant:
+    Participant - Book with invariant:
         Book Name Length: name must have minimum length of 1.
     """
-    while True:
-        name = input("Book name: ").strip()
-        # Invariant: Book Name Length – min_length = 1
-        if len(name) < 1:
+    name_is_valid = False
+    name = ""
+    while not name_is_valid:
+        raw_name = input("Book name: ")
+        name = raw_name.strip()
+        name_length = len(name)
+        # Invariant: Book Name Length - min_length = 1
+        if name_length < 1:
             print("  [!] Book name must be at least 1 character. Please try again.")
-            continue
-        break
-    genre = input("Book genre: ").strip()
-    return {"name": name, "genre": genre}
+        else:
+            name_is_valid = True
+    raw_genre = input("Book genre: ")
+    genre = raw_genre.strip()
+    book = {"name": name, "genre": genre}
+    return book
 
 
-def add_book_to_basket(book: dict) -> None:
+def add_book_to_basket(book: Dict) -> None:
     """Place the accepted book in the basket."""
     basket.append(book)
-    print(f"  ✓ '{book['name']}' added to the basket.")
+    book_name = book["name"]
+    print(f"  '{book_name}' added to the basket.")
 
 
 def run_accept_book() -> None:
     """Execute the AcceptBook graph."""
-    if not accept_choice_to_add_book_to_basket():
-        return
-    book = accept_book_from_user()
-    add_book_to_basket(book)
+    confirmed = accept_choice_to_add_book_to_basket()
+    if confirmed:
+        book = accept_book_from_user()
+        add_book_to_basket(book)
 
 
 # ---------------------------------------------------------------------------
-# Graph 2 – PlaceBookOnShelf
-# Behaviors: AcceptChoiceToPlaceBooksOnShelf → GetBookFromBasket →
-#            GetFirstLetterOfBookName → [CreateSlotOnBookShelf →] AddBookToShelf
+# Graph 2 - PlaceBookOnShelf
+# Behaviors: AcceptChoiceToPlaceBooksOnShelf -> GetBookFromBasket ->
+#            GetFirstLetterOfBookName -> [CreateSlotOnBookShelf ->] AddBookToShelf
 #            (loops back to GetBookFromBasket until basket is empty)
 # ---------------------------------------------------------------------------
+
 
 def accept_choice_to_place_books_on_shelf() -> bool:
     """Atomic entry behavior.
@@ -86,66 +101,83 @@ def accept_choice_to_place_books_on_shelf() -> bool:
     The librarian accepts the choice to place all basket books on the shelf.
     """
     print("\n=== Place Books on the Shelf ===")
-    if not basket:
-        print("  The basket is empty — nothing to shelve.")
+    basket_is_empty = len(basket) == 0
+    if basket_is_empty:
+        print("  The basket is empty - nothing to shelve.")
         return False
-    print(f"  {len(basket)} book(s) in basket.")
-    answer = input("Proceed? (y/n): ").strip().lower()
-    return answer == "y"
+    basket_count = len(basket)
+    print(f"  {basket_count} book(s) in basket.")
+    raw_answer = input("Proceed? (y/n): ")
+    stripped_answer = raw_answer.strip()
+    lowered_answer = stripped_answer.lower()
+    confirmed = lowered_answer == "y"
+    return confirmed
 
 
-def get_book_from_basket() -> Optional[dict]:
+def get_book_from_basket() -> Optional[Dict]:
     """Retrieve the next book from the basket; returns None when empty."""
-    if not basket:
+    basket_is_empty = len(basket) == 0
+    if basket_is_empty:
         return None
-    return basket.pop(0)
+    book = basket.pop(0)
+    return book
 
 
-def get_first_letter_of_book_name(book: dict) -> str:
+def get_first_letter_of_book_name(book: Dict) -> str:
     """Read the first letter of the book's name."""
-    if not book.get("name"):
-        raise ValueError(f"Book has an empty name: {book!r}")
-    return book["name"][0].upper()
+    book_name = book.get("name")
+    if not book_name:
+        error_message = f"Book has an empty name: {book!r}"
+        raise ValueError(error_message)
+    first_letter = book_name[0]
+    first_letter_upper = first_letter.upper()
+    return first_letter_upper
 
 
 def create_slot_on_book_shelf(letter: str) -> None:
     """Create a shelf slot for *letter* if one does not already exist."""
-    if letter not in shelf:
+    slot_already_exists = letter in shelf
+    if not slot_already_exists:
         shelf[letter] = []
         print(f"  Created shelf slot '{letter}'.")
 
 
-def add_book_to_shelf(book: dict, letter: str) -> None:
+def add_book_to_shelf(book: Dict, letter: str) -> None:
     """Add the book to the shelf slot identified by *letter*."""
     shelf[letter].append(book)
-    print(f"  ✓ '{book['name']}' shelved under '{letter}'.")
+    book_name = book["name"]
+    print(f"  '{book_name}' shelved under '{letter}'.")
 
 
 def run_place_book_on_shelf() -> None:
     """Execute the PlaceBookOnShelf graph."""
-    if not accept_choice_to_place_books_on_shelf():
+    confirmed = accept_choice_to_place_books_on_shelf()
+    if not confirmed:
         return
 
-    # GetBookFromBasket → loop
-    while True:
+    all_shelved = False
+    while not all_shelved:
+        # GetBookFromBasket
         book = get_book_from_basket()
-        if book is None:
+        basket_is_now_empty = book is None
+        if basket_is_now_empty:
             print("  All books have been shelved.")
-            break
-
-        # GetFirstLetterOfBookName
-        letter = get_first_letter_of_book_name(book)
-
-        # CreateSlotOnBookShelf (only when slot is missing) → AddBookToShelf
-        create_slot_on_book_shelf(letter)
-        add_book_to_shelf(book, letter)
-        # → back to GetBookFromBasket
+            all_shelved = True
+        else:
+            # GetFirstLetterOfBookName
+            letter = get_first_letter_of_book_name(book)
+            # CreateSlotOnBookShelf (only when slot is missing)
+            create_slot_on_book_shelf(letter)
+            # AddBookToShelf
+            add_book_to_shelf(book, letter)
+            # loop back to GetBookFromBasket
 
 
 # ---------------------------------------------------------------------------
-# Graph 3 – AuditLibrary
-# Behaviors: AcceptChoiceToAuditLibrary → GenerateAuditReport → HandAuditToUser
+# Graph 3 - AuditLibrary
+# Behaviors: AcceptChoiceToAuditLibrary -> GenerateAuditReport -> HandAuditToUser
 # ---------------------------------------------------------------------------
+
 
 def accept_choice_to_audit_library() -> bool:
     """Atomic entry behavior.
@@ -153,71 +185,82 @@ def accept_choice_to_audit_library() -> bool:
     The librarian accepts the choice to audit the library.
     """
     print("\n=== Audit the Library ===")
-    answer = input("Proceed? (y/n): ").strip().lower()
-    return answer == "y"
+    raw_answer = input("Proceed? (y/n): ")
+    stripped_answer = raw_answer.strip()
+    lowered_answer = stripped_answer.lower()
+    confirmed = lowered_answer == "y"
+    return confirmed
 
 
-def generate_audit_report() -> dict:
+def generate_audit_report() -> Dict:
     """Generate the audit report from the current shelf state."""
-    return {
-        "shelf": {letter: books for letter, books in sorted(shelf.items())},
-        "basket_count": len(basket),
-    }
+    sorted_shelf_letters = sorted(shelf.keys())
+    sorted_shelf: Dict[str, List[Dict]] = {}
+    for letter in sorted_shelf_letters:
+        books_on_letter_slot = shelf[letter]
+        sorted_shelf[letter] = books_on_letter_slot
+    basket_count = len(basket)
+    report = {"shelf": sorted_shelf, "basket_count": basket_count}
+    return report
 
 
-def hand_audit_to_user(report: dict) -> None:
+def hand_audit_to_user(report: Dict) -> None:
     """Display the audit report to the user."""
     print("\n--- Audit Report ---")
-    if not report["shelf"]:
+    shelf_data = report["shelf"]
+    shelf_is_empty = len(shelf_data) == 0
+    if shelf_is_empty:
         print("  The shelf is empty.")
     else:
-        for letter, books in report["shelf"].items():
+        for letter in shelf_data:
             print(f"  [{letter}]")
-            for book in books:
-                print(f"    • {book['name']}  ({book['genre']})")
-    print(f"\n  Basket: {report['basket_count']} book(s) awaiting shelving.")
+            books_in_slot = shelf_data[letter]
+            for book in books_in_slot:
+                book_name = book["name"]
+                book_genre = book["genre"]
+                print(f"    - {book_name}  ({book_genre})")
+    basket_count = report["basket_count"]
+    print(f"\n  Basket: {basket_count} book(s) awaiting shelving.")
     print("--------------------")
 
 
 def run_audit_library() -> None:
     """Execute the AuditLibrary graph."""
-    if not accept_choice_to_audit_library():
-        return
-    report = generate_audit_report()
-    hand_audit_to_user(report)
+    confirmed = accept_choice_to_audit_library()
+    if confirmed:
+        report = generate_audit_report()
+        hand_audit_to_user(report)
 
 
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
-    print("╔══════════════════════════╗")
-    print("║    Library Manager       ║")
-    print("╚══════════════════════════╝")
+    print("Library Manager")
 
-    menu = {
-        "1": ("Add a book to the basket  (AcceptBook)", run_accept_book),
-        "2": ("Place books on the shelf  (PlaceBookOnShelf)", run_place_book_on_shelf),
-        "3": ("Audit the library         (AuditLibrary)", run_audit_library),
-        "4": ("Exit", None),
-    }
-
-    while True:
+    running = True
+    while running:
         print("\n--- Menu ---")
-        for key, (label, _) in menu.items():
-            print(f"  {key}. {label}")
-        choice = input("Choice: ").strip()
+        print("  1. Add a book to the basket  (AcceptBook)")
+        print("  2. Place books on the shelf  (PlaceBookOnShelf)")
+        print("  3. Audit the library         (AuditLibrary)")
+        print("  4. Exit")
+        raw_choice = input("Choice: ")
+        choice = raw_choice.strip()
 
-        if choice == "4":
+        if choice == "1":
+            run_accept_book()
+        elif choice == "2":
+            run_place_book_on_shelf()
+        elif choice == "3":
+            run_audit_library()
+        elif choice == "4":
             print("Goodbye!")
-            break
-        if choice in menu:
-            _, action = menu[choice]
-            if action:
-                action()
+            running = False
         else:
-            print("  Invalid choice. Please enter 1–4.")
+            print("  Invalid choice. Please enter 1-4.")
 
 
 if __name__ == "__main__":
