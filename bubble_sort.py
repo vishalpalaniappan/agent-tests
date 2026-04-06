@@ -68,8 +68,7 @@ def bubble_sort(sequence, ordering_rel=lambda a, b: a > b):
                 # The pair is out of order: exchange the elements and set the
                 # swap flag so the pass is recorded as productive.
                 sequence[current_index], sequence[current_index + 1] = (
-                    sequence[current_index + 1],
-                    sequence[current_index],
+                    adjacent_pair[1], adjacent_pair[0]
                 )
                 swap_flag = True
                 # ─────────────────────────────────────────────────────────────
@@ -118,5 +117,5 @@ if __name__ == "__main__":
     ]
 
     for lst in examples:
-        result = bubble_sort(lst[:])   # sort a copy so the original is preserved
+        result = bubble_sort(lst[:])   # pass a copy to leave the original intact for display
         print(f"sorted: {result}")
