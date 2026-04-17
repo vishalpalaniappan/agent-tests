@@ -1,6 +1,6 @@
 def b_AcceptString(stringToCheck):
     """AcceptString (atomic): String to check to see if it is a palindrome."""
-    return stringToCheck
+    return str(stringToCheck)
 
 
 def b_InitLeftPosition(stringToCheck):
