@@ -1,6 +1,17 @@
 def b_AcceptString(stringToCheck):
     """AcceptString (atomic): String to check to see if it is a palindrome."""
-    return str(stringToCheck)
+    return stringToCheck
+
+
+def b__CheckIsString(stringToCheck):
+    """_CheckIsString: Checks if the input is a string. If it is, proceeds to initialize positions. If not, rejects the input."""
+    isString = isinstance(stringToCheck, str)
+    return isString
+
+
+def b__RejectInvalidInput(stringToCheck):
+    """_RejectInvalidInput: Rejects the input because it is not a string and prints an error message."""
+    print(f"Error: Expected a string but received {type(stringToCheck).__name__}. Input rejected.")
 
 
 def b_InitLeftPosition(stringToCheck):
@@ -75,33 +86,38 @@ def main(stringToCheck):
     # AcceptString (atomic): get the string to check
     stringToCheck = b_AcceptString(stringToCheck)
 
-    # InitLeftPosition: set left pointer to start of string
-    leftPosition = b_InitLeftPosition(stringToCheck)
+    # _CheckIsString: validate that input is a string
+    if b__CheckIsString(stringToCheck):
+        # InitLeftPosition: set left pointer to start of string
+        leftPosition = b_InitLeftPosition(stringToCheck)
 
-    # InitRightPosition: set right pointer to end of string
-    rightPosition = b_InitRightPosition(stringToCheck)
+        # InitRightPosition: set right pointer to end of string
+        rightPosition = b_InitRightPosition(stringToCheck)
 
-    # Main loop: CheckIfLeftCrossedRight → either MarkAsPalindrome or continue comparing
-    while True:
-        if b_CheckIfLeftCrossedRight(leftPosition, rightPosition):
-            # left has reached or crossed right with all chars equal → palindrome
-            isPalindrome = b__MarkAsPalindrome()
-            break
+        # Main loop: CheckIfLeftCrossedRight → either MarkAsPalindrome or continue comparing
+        while True:
+            if b_CheckIfLeftCrossedRight(leftPosition, rightPosition):
+                # left has reached or crossed right with all chars equal → palindrome
+                isPalindrome = b__MarkAsPalindrome()
+                break
 
-        # GetLeftValue and GetRightValue
-        leftValue = b__GetLeftValue(stringToCheck, leftPosition)
-        rightValue = b__GetRightValue(stringToCheck, rightPosition)
+            # GetLeftValue and GetRightValue
+            leftValue = b__GetLeftValue(stringToCheck, leftPosition)
+            rightValue = b__GetRightValue(stringToCheck, rightPosition)
 
-        # CheckIfEqual → either continue or mark not palindrome
-        if b__CheckIfEqual(leftValue, rightValue):
-            leftPosition = b__IncrementLeftPosition(leftPosition)
-            rightPosition = b__DecrementRightPosition(rightPosition)
-        else:
-            isPalindrome = b__MarkAsNotAPalindrome()
-            break
+            # CheckIfEqual → either continue or mark not palindrome
+            if b__CheckIfEqual(leftValue, rightValue):
+                leftPosition = b__IncrementLeftPosition(leftPosition)
+                rightPosition = b__DecrementRightPosition(rightPosition)
+            else:
+                isPalindrome = b__MarkAsNotAPalindrome()
+                break
 
-    # ShowResults: print the result
-    b__ShowResults(isPalindrome)
+        # ShowResults: print the result
+        b__ShowResults(isPalindrome)
+    else:
+        # _RejectInvalidInput: input is not a string, reject it
+        b__RejectInvalidInput(stringToCheck)
 
 
 if __name__ == "__main__":
