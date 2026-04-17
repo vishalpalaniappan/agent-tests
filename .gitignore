@@ -1,0 +1,10 @@
+# Build artefacts and generated output
+__pycache__/
+*.pyc
+*.pyo
+
+# Image processing output files
+output/
+
+# Log files
+logs/
