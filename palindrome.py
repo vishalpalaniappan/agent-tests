@@ -1,6 +1,3 @@
-import sys
-
-
 def log_transition(behavior_name, participants):
     """Log a behavior transition with participant variable values."""
     parts = ", ".join(f"{k}={repr(v)}" for k, v in participants.items())
@@ -73,14 +70,14 @@ def _DecrementRightPosition(rightPosition):
 def _MarkAsPalindrome():
     """_MarkAsPalindrome: Marks the string as palindrome because left has crossed right and all the characters were equal."""
     isPalindrome = True
-    log_transition("_MarkAsPalindrome", {})
+    log_transition("_MarkAsPalindrome", {"isPalindrome": isPalindrome})
     return isPalindrome
 
 
 def _MarkAsNotAPalindrome():
     """_MarkAsNotAPalindrome: Mark the string as not a palindrome because left and right were not equal."""
     isPalindrome = False
-    log_transition("_MarkAsNotAPalindrome", {})
+    log_transition("_MarkAsNotAPalindrome", {"isPalindrome": isPalindrome})
     return isPalindrome
 
 
