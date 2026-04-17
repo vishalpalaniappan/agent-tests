@@ -1,6 +1,5 @@
-def b_AcceptString():
+def b_AcceptString(stringToCheck):
     """AcceptString (atomic): String to check to see if it is a palindrome."""
-    stringToCheck = input("Enter a string to check: ")
     return stringToCheck
 
 
@@ -22,49 +21,49 @@ def b_CheckIfLeftCrossedRight(leftPosition, rightPosition):
     return crossed
 
 
-def b_GetLeftValue(stringToCheck, leftPosition):
+def b__GetLeftValue(stringToCheck, leftPosition):
     """_GetLeftValue: Gets the character at the left position in the string."""
     leftValue = stringToCheck[leftPosition]
     return leftValue
 
 
-def b_GetRightValue(stringToCheck, rightPosition):
+def b__GetRightValue(stringToCheck, rightPosition):
     """_GetRightValue: Gets the character at the right position in the string."""
     rightValue = stringToCheck[rightPosition]
     return rightValue
 
 
-def b_CheckIfEqual(leftValue, rightValue):
+def b__CheckIfEqual(leftValue, rightValue):
     """_CheckIfEqual: Checks if the left value and the right value are equal."""
     equal = leftValue == rightValue
     return equal
 
 
-def b_IncrementLeftPosition(leftPosition):
+def b__IncrementLeftPosition(leftPosition):
     """_IncrementLeftPosition: Increments the left position since characters at the previous left and right position were both equal."""
     leftPosition += 1
     return leftPosition
 
 
-def b_DecrementRightPosition(rightPosition):
+def b__DecrementRightPosition(rightPosition):
     """_DecrementRightPosition: Decrements the right position since characters at the previous left and right position were both equal."""
     rightPosition -= 1
     return rightPosition
 
 
-def b_MarkAsPalindrome():
+def b__MarkAsPalindrome():
     """_MarkAsPalindrome: Marks the string as palindrome because left has crossed right and all the characters were equal."""
     isPalindrome = True
     return isPalindrome
 
 
-def b_MarkAsNotAPalindrome():
+def b__MarkAsNotAPalindrome():
     """_MarkAsNotAPalindrome: Mark the string as not a palindrome because left and right were not equal."""
     isPalindrome = False
     return isPalindrome
 
 
-def b_ShowResults(isPalindrome):
+def b__ShowResults(isPalindrome):
     """_ShowResults: Print the results (if it is a palindrome) to the screen."""
     if isPalindrome:
         print("Result: The string IS a palindrome.")
@@ -72,9 +71,9 @@ def b_ShowResults(isPalindrome):
         print("Result: The string is NOT a palindrome.")
 
 
-def main():
+def main(stringToCheck):
     # AcceptString (atomic): get the string to check
-    stringToCheck = b_AcceptString()
+    stringToCheck = b_AcceptString(stringToCheck)
 
     # InitLeftPosition: set left pointer to start of string
     leftPosition = b_InitLeftPosition(stringToCheck)
@@ -86,24 +85,25 @@ def main():
     while True:
         if b_CheckIfLeftCrossedRight(leftPosition, rightPosition):
             # left has reached or crossed right with all chars equal → palindrome
-            isPalindrome = b_MarkAsPalindrome()
+            isPalindrome = b__MarkAsPalindrome()
             break
 
         # GetLeftValue and GetRightValue
-        leftValue = b_GetLeftValue(stringToCheck, leftPosition)
-        rightValue = b_GetRightValue(stringToCheck, rightPosition)
+        leftValue = b__GetLeftValue(stringToCheck, leftPosition)
+        rightValue = b__GetRightValue(stringToCheck, rightPosition)
 
         # CheckIfEqual → either continue or mark not palindrome
-        if b_CheckIfEqual(leftValue, rightValue):
-            leftPosition = b_IncrementLeftPosition(leftPosition)
-            rightPosition = b_DecrementRightPosition(rightPosition)
+        if b__CheckIfEqual(leftValue, rightValue):
+            leftPosition = b__IncrementLeftPosition(leftPosition)
+            rightPosition = b__DecrementRightPosition(rightPosition)
         else:
-            isPalindrome = b_MarkAsNotAPalindrome()
+            isPalindrome = b__MarkAsNotAPalindrome()
             break
 
     # ShowResults: print the result
-    b_ShowResults(isPalindrome)
+    b__ShowResults(isPalindrome)
 
 
 if __name__ == "__main__":
-    main()
+    stringToCheck = input("Enter a string to check: ")
+    main(stringToCheck)
